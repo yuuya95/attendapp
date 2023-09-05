@@ -1,18 +1,24 @@
 <template>
   <div class="home">
     <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <p>{{ user.name }}</p>
+    <button class="button" v-on:click="change_name()">Add to Cart</button>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
-
+import { useUserStore } from '../stores/user'
 export default {
   name: 'HomeView',
-  components: {
-    HelloWorld
-  }
+  setup(){
+    const user = useUserStore()
+    const change_name = () => {
+      user.change_name("yuyuyuyuy")
+    }
+    return{
+      user,
+      change_name,
+    }
+  },
 }
 </script>
