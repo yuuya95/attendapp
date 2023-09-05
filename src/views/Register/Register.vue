@@ -102,14 +102,29 @@ import { useUserStore } from '../../stores/user'
 export default {
     name: 'RegisterView',
     setup(){
+        // 教師の情報
         const tc_grade = ref()
         const tc_passRe = ref()
         const tc_pass = ref()
         const tc_email = ref()
         const tc_name = ref()
+
+        // 生徒の情報
+        const st_grade = ref()
+        // const st_passRe = ref()
+        const st_pass = ref()
+        const st_email = ref()
+        const st_name = ref()
+        const st_classes = ref()
+        const st_number = ref()
+
         const userID = ref()
-        const isST = ref(true);
+
+        // Pinia
         const user = useUserStore()
+
+        // 生徒用を選択しているか否か
+        const isST = ref(true);
         const tc_choose = () => {
             isST.value = false
             console.log(isST)
@@ -152,6 +167,40 @@ export default {
                 console.log(error)
             }
         }
+        const registerST = async () => {
+            try {
+                await createUserWithEmailAndPassword(auth, st_email.value, st_pass.value)
+                .then((userCredential) => {
+                    userID.value = userCredential.user.uid;
+                })
+                .catch((error) => {
+                    console.log(error.code);
+                });
+
+                await sendEmailVerification(auth.currentUser)
+
+                await signOut(auth)
+
+                const data = {
+                    name: st_name.value,
+                    grade: st_grade.value,
+                    classes: st_classes.value,
+                    number: st_number.value,
+                    state: "st"
+                }
+                // user.$patch({
+                //     name: tc_name,
+                //     grade: tc_grade.value,
+                //     state: 'tc',
+                // })
+                // console.log(user.name, user.grade, user.state)
+                const docRef = doc(db, "user", userID.value);
+                await setDoc(docRef, data);
+                // this.$router.push({name: 'registerSecondST', params: {email: this.email, password: this.password}})
+            } catch (error) {
+                console.log(error)
+            }
+        }
         return{
             isST,
             tc_pass,
@@ -159,6 +208,12 @@ export default {
             tc_grade,
             tc_name,
             tc_passRe,
+            st_pass,
+            st_email,
+            st_grade,
+            st_name,
+            st_classes,
+            st_number,
             userID,
             user,
 
@@ -167,54 +222,6 @@ export default {
             registerTC,
         }
     },
-    // methods:{
-    //     mounted() {
-    //         this.auth = getAuth()
-    //         console.log("a")
-    //     },
-    //     async registerST(){
-            // try {
-            //     const user = await createUserWithEmailAndPassword(getAuth(), this.email, this.password);
-            //     await sendEmailVerification(getAuth().currentUser)
-            //     console.log("success!")
-            //     this.$router.push({name: 'registerSecondST', params: {email: this.email, password: this.password}})
-            // } catch (error) {
-            //     console.log(error)
-            // }
-    //     },
-    //     async registerTC(){
-    //         // this.$router.push({name: 'registerSecond', params: {email: this.email, password: this.password}})
-    //         // createUserWithEmailAndPassword(getAuth(), this.email, this.password)
-    //         // .then((data) => {
-    //         //     console.log("success!")
-    //         //     this.$router.push("/")
-    //         // })
-    //         // .catch((error) => {
-    //         //     console.log(error.code)
-    //         // })
-    //         try {
-    //             const user = await createUserWithEmailAndPassword(getAuth(), this.email, this.password);
-    //             await sendEmailVerification(getAuth().currentUser)
-    //             console.log("success!")
-    //             this.$router.push({name: 'registerSecondTC', params: {email: this.email, password: this.password}})
-    //         } catch (error) {
-    //             if (error === "auth/user-not-found") {
-    //                 this.errorMessage = "登録されていないメールアドレス又はパスワードが違います";
-    //             } else if (error === "auth/wrong-password") {
-    //                 this.errorMessage = "パスワードが違います";
-    //             }
-    //         }
-    //     },
-    // },
-    data() {
-        return{
-            email: "",
-            password: "",
-            store: null,
-            auth: null,
-            errorMessage: "",
-        }
-    }
 }
 </script>
 
